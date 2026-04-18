@@ -173,5 +173,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 Murat Ay
 - 🎓 Software Engineering, Istinye University
-- 📧 [E-Mail](mailto:murat.3d.02@hotmail.com)
+- 📧 murat.3d.02@hotmail.com
 - 💼 [LinkedIn](https://www.linkedin.com/in/murat-ay-47a259377/)
