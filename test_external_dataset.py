@@ -61,10 +61,7 @@ def main():
     y_true = df["label"]
     y_pred_raw = model.predict(X)
 
-    # Model 0/1 döndürüyorsa OR/CG'ye çevir.
-    # Senin sisteminde genelde:
-    # 0 = REAL / OR
-    # 1 = FAKE / CG
+
     y_pred = []
 
     for pred in y_pred_raw:
