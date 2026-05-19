@@ -186,6 +186,7 @@ fake-review-detection/
 ├── fake_review_detector_4.py     # Main ML pipeline (EDA + 4-model training)
 ├── train_and_save_model.py       # Train and persist final SVM + TF-IDF artifacts
 ├── app.py                        # Streamlit web interface with abstention
+├──Start_app.bat                  # To start the app.py
 ├── test_external_dataset.py      # External test evaluation script
 ├── requirements.txt              # Python dependencies
 ├── models/                       # Saved model artifacts (.pkl, .json)
