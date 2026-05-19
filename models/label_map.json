@@ -1,0 +1,69 @@
+{
+    "0": "REAL",
+    "1": "FAKE",
+    "label_map": {
+        "OR": 0,
+        "CG": 1
+    },
+    "reverse_label_map": {
+        "0": "REAL",
+        "1": "FAKE"
+    },
+    "source_labels": {
+        "OR": "REAL",
+        "CG": "FAKE"
+    },
+    "turkish_labels": {
+        "REAL": "GERÇEK YORUM",
+        "FAKE": "SAHTE YORUM"
+    },
+    "best_model_name": "SVM LinearSVC",
+    "model_classes": [
+        0,
+        1
+    ],
+    "tfidf_params": {
+        "max_features": 20000,
+        "ngram_range": [
+            1,
+            2
+        ],
+        "max_df": 0.95,
+        "min_df": 2,
+        "sublinear_tf": true
+    },
+    "model_results": {
+        "Naive Bayes": {
+            "accuracy": 0.8908124149870162,
+            "precision": 0.8909931313534356,
+            "recall": 0.8908124149870162,
+            "f1": 0.8907996314295782,
+            "cv_mean": 0.8884180516316196,
+            "cv_std": 0.004765974615649549
+        },
+        "Logistic Regression": {
+            "accuracy": 0.9029306294052183,
+            "precision": 0.902934755736845,
+            "recall": 0.9029306294052183,
+            "f1": 0.9029303592707408,
+            "cv_mean": 0.8974152116755301,
+            "cv_std": 0.0032693143524315602
+        },
+        "SVM LinearSVC": {
+            "accuracy": 0.9129467045876097,
+            "precision": 0.9129482997351963,
+            "recall": 0.9129467045876097,
+            "f1": 0.912946608748369,
+            "cv_mean": 0.9085146915889137,
+            "cv_std": 0.001629761760309721
+        },
+        "Random Forest": {
+            "accuracy": 0.8711512303697292,
+            "precision": 0.8713431055609894,
+            "recall": 0.8711512303697292,
+            "f1": 0.8711343713001066,
+            "cv_mean": 0.8613341990768397,
+            "cv_std": 0.006331701005561292
+        }
+    }
+}
