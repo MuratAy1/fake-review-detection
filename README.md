@@ -196,8 +196,9 @@ fake-review-detection/
 │   ├── 04_model_karsilastirma.png
 │   ├── 05_cross_validation.png
 │   └── 06_sonuc_tablosu.csv
-└── docs/
-    └── tez_raporu.docx           # Thesis report (Turkish)
+└── .streamlit/
+    ├── config.toml
+    └── credentials.toml  
 ```
 
 ---
