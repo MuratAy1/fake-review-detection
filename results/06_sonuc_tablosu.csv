@@ -1,0 +1,5 @@
+Model,Accuracy,Precision,Recall,F1 Score,CV Mean,CV Std
+Naive Bayes,0.8908,0.8910,0.8908,0.8908,0.8884,+/-0.0048
+Logistic Regression,0.9029,0.9029,0.9029,0.9029,0.8974,+/-0.0033
+SVM (LinearSVC),0.9129,0.9129,0.9129,0.9129,0.9085,+/-0.0016
+Random Forest,0.8702,0.8704,0.8702,0.8701,0.8620,+/-0.0062
