@@ -1,5 +1,3 @@
-# train_and_save_model.py
-
 import os
 import re
 import json
