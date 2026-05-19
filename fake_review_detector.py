@@ -1,10 +1,9 @@
 """
-Fake Reviews and Opinion Spam Detection using Machine Learning Algorithms.
+Fake review detection pipeline.
 
-Pipeline compares four supervised classifiers (Naive Bayes, Logistic Regression,
-LinearSVC, Random Forest) on the Kaggle Fake Reviews Dataset using TF-IDF
-features over cleaned review text. Outputs evaluation metrics, confusion
-matrices and cross-validation scores as PNG figures and a CSV summary.
+Compares Naive Bayes, Logistic Regression, LinearSVC and Random Forest on
+the Kaggle Fake Reviews Dataset using TF-IDF features. Produces evaluation
+metrics, confusion matrices, cross-validation scores and a CSV summary.
 
 Dataset: https://www.kaggle.com/datasets/mexwell/fake-reviews-dataset
 """
@@ -41,7 +40,6 @@ from sklearn.metrics import (
 
 warnings.filterwarnings("ignore")
 
-# Download required NLTK resources (silent if already present).
 for resource in ("stopwords", "punkt", "punkt_tab", "wordnet"):
     nltk.download(resource, quiet=True)
 
@@ -52,11 +50,7 @@ except ImportError:
     WORDCLOUD_AVAILABLE = False
 
 
-# ---------------------------------------------------------------------------
-# Data loading and exploration
-# ---------------------------------------------------------------------------
 def load_data(filepath):
-    """Load the dataset and print basic information about its structure."""
     print("=" * 60)
     print("Step 1: Loading data")
     print("=" * 60)
@@ -76,7 +70,6 @@ def load_data(filepath):
 
 
 def explore_data(df, text_column, label_column):
-    """Generate exploratory plots: class distribution, length distributions, word clouds."""
     print("\n" + "=" * 60)
     print("Step 2: Exploratory data analysis")
     print("=" * 60)
@@ -86,7 +79,6 @@ def explore_data(df, text_column, label_column):
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle("Exploratory Data Analysis", fontsize=16, fontweight="bold")
 
-    # Class distribution
     class_counts = df[label_column].value_counts()
     colors = ["#2ecc71", "#e74c3c"]
     axes[0, 0].bar(class_counts.index, class_counts.values, color=colors)
@@ -96,11 +88,9 @@ def explore_data(df, text_column, label_column):
     for i, v in enumerate(class_counts.values):
         axes[0, 0].text(i, v + 200, str(v), ha="center", fontweight="bold")
 
-    # Length features
     df["review_length"] = df[text_column].astype(str).apply(len)
     df["word_count"] = df[text_column].astype(str).apply(lambda x: len(x.split()))
 
-    # Character length distribution
     for label in df[label_column].unique():
         subset = df[df[label_column] == label]
         axes[0, 1].hist(subset["review_length"], bins=50, alpha=0.6, label=label)
@@ -109,7 +99,6 @@ def explore_data(df, text_column, label_column):
     axes[0, 1].set_ylabel("Frequency")
     axes[0, 1].legend()
 
-    # Word count distribution
     for label in df[label_column].unique():
         subset = df[df[label_column] == label]
         axes[1, 0].hist(subset["word_count"], bins=50, alpha=0.6, label=label)
@@ -118,7 +107,6 @@ def explore_data(df, text_column, label_column):
     axes[1, 0].set_ylabel("Frequency")
     axes[1, 0].legend()
 
-    # Mean word count by class
     stats = df.groupby(label_column)["word_count"].mean()
     axes[1, 1].bar(stats.index, stats.values, color=colors)
     axes[1, 1].set_title("Average word count per class")
@@ -152,12 +140,7 @@ def explore_data(df, text_column, label_column):
     return df
 
 
-# ---------------------------------------------------------------------------
-# Text preprocessing
-# ---------------------------------------------------------------------------
 def preprocess_text(text):
-    """Clean a single review: lowercase, strip URLs/HTML/digits/punctuation,
-    remove English stopwords, lemmatize, drop one-character tokens."""
     if pd.isna(text):
         return ""
 
@@ -181,7 +164,6 @@ def preprocess_text(text):
 
 
 def preprocess_dataframe(df, text_column, label_column):
-    """Apply preprocess_text to every row and drop empties."""
     print("\n" + "=" * 60)
     print("Step 3: Text preprocessing")
     print("=" * 60)
@@ -203,16 +185,11 @@ def preprocess_dataframe(df, text_column, label_column):
     return df
 
 
-# ---------------------------------------------------------------------------
-# Feature extraction (TF-IDF)
-# ---------------------------------------------------------------------------
-def extract_features(df, label_column, max_features=10000):
-    """Convert cleaned text to TF-IDF features and return train/test splits."""
+def extract_features(df, label_column, max_features=20000):
     print("\n" + "=" * 60)
     print("Step 4: Feature extraction (TF-IDF)")
     print("=" * 60)
 
-    # Map string labels to binary targets. CG = fake (1), OR = real (0).
     if df[label_column].dtype == "object":
         unique_labels = df[label_column].unique()
         print(f"Found labels: {unique_labels}")
@@ -226,13 +203,11 @@ def extract_features(df, label_column, max_features=10000):
         label_map = None
         df["label_numeric"] = df[label_column]
 
-    # Stratified 80/20 split to preserve class balance.
+    X = df["cleaned_text"]
+    y = df["label_numeric"]
+
     X_train, X_test, y_train, y_test = train_test_split(
-        df["cleaned_text"],
-        df["label_numeric"],
-        test_size=0.20,
-        random_state=42,
-        stratify=df["label_numeric"],
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
 
     print(f"\nTraining set: {len(X_train)} reviews")
@@ -246,32 +221,26 @@ def extract_features(df, label_column, max_features=10000):
         sublinear_tf=True,
     )
 
-    # Fit only on training data to avoid leakage.
     X_train_tfidf = tfidf.fit_transform(X_train)
     X_test_tfidf = tfidf.transform(X_test)
 
     print(f"\nTF-IDF matrix shape: {X_train_tfidf.shape}")
-
     feature_names = tfidf.get_feature_names_out()
     print(f"Example features (first 20): {list(feature_names[:20])}")
 
     return X_train_tfidf, X_test_tfidf, y_train, y_test, tfidf, label_map
 
 
-# ---------------------------------------------------------------------------
-# Model training and evaluation
-# ---------------------------------------------------------------------------
 def train_and_evaluate_models(X_train, X_test, y_train, y_test):
-    """Train four classifiers and collect test metrics plus 5-fold CV scores."""
     print("\n" + "=" * 60)
     print("Step 5: Model training and evaluation")
     print("=" * 60)
 
     models = {
-        "Naive Bayes": MultinomialNB(alpha=1.0),
-        "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42, C=1.0),
-        "SVM (LinearSVC)": LinearSVC(max_iter=2000, random_state=42, C=1.0),
-        "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=-1),
+        "Naive Bayes": MultinomialNB(alpha=0.5),
+        "Logistic Regression": LogisticRegression(max_iter=5000, random_state=42, class_weight="balanced", solver="liblinear", C=1.0),
+        "SVM (LinearSVC)": LinearSVC(max_iter=5000, random_state=42, class_weight="balanced", C=1.0),
+        "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42, class_weight="balanced", n_jobs=-1),
     }
 
     results = {}
@@ -288,7 +257,6 @@ def train_and_evaluate_models(X_train, X_test, y_train, y_test):
         rec = recall_score(y_test, y_pred, average="weighted")
         f1 = f1_score(y_test, y_pred, average="weighted")
 
-        # 5-fold CV on the training set for a generalisation estimate.
         cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring="accuracy")
 
         results[name] = {
@@ -313,18 +281,13 @@ def train_and_evaluate_models(X_train, X_test, y_train, y_test):
     return results
 
 
-# ---------------------------------------------------------------------------
-# Plotting
-# ---------------------------------------------------------------------------
 def plot_results(results, y_test):
-    """Generate confusion matrices, metric comparison, and CV summary plots."""
     print("\n" + "=" * 60)
     print("Step 6: Plotting")
     print("=" * 60)
 
     model_names = list(results.keys())
 
-    # Confusion matrices
     fig, axes = plt.subplots(2, 2, figsize=(14, 12))
     fig.suptitle("Confusion Matrices", fontsize=16, fontweight="bold")
 
@@ -349,7 +312,6 @@ def plot_results(results, y_test):
     plt.show()
     print("Saved 03_confusion_matrices.png")
 
-    # Metric comparison
     metrics = ["accuracy", "precision", "recall", "f1_score"]
     metric_labels = ["Accuracy", "Precision", "Recall", "F1 Score"]
 
@@ -385,7 +347,6 @@ def plot_results(results, y_test):
     plt.show()
     print("Saved 04_model_karsilastirma.png")
 
-    # Cross-validation summary
     fig, ax = plt.subplots(figsize=(10, 6))
     cv_means = [results[name]["cv_mean"] for name in model_names]
     cv_stds = [results[name]["cv_std"] for name in model_names]
@@ -421,7 +382,6 @@ def plot_results(results, y_test):
 
 
 def generate_summary_table(results):
-    """Build a summary DataFrame and write it to CSV."""
     print("\n" + "=" * 60)
     print("Summary table")
     print("=" * 60)
@@ -448,11 +408,7 @@ def generate_summary_table(results):
     return summary
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
 def main():
-    # Update these to match your local file and column names if needed.
     DATA_FILE = "fake_reviews_dataset.csv"
     TEXT_COLUMN = "text_"
     LABEL_COLUMN = "label"
@@ -470,7 +426,7 @@ def main():
     df = preprocess_dataframe(df, TEXT_COLUMN, LABEL_COLUMN)
 
     X_train, X_test, y_train, y_test, tfidf, label_map = extract_features(
-        df, LABEL_COLUMN, max_features=10000
+        df, LABEL_COLUMN, max_features=20000
     )
 
     results = train_and_evaluate_models(X_train, X_test, y_train, y_test)
