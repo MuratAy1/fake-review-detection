@@ -1,10 +1,4 @@
 """
-Fake review detection pipeline.
-
-Compares Naive Bayes, Logistic Regression, LinearSVC and Random Forest on
-the Kaggle Fake Reviews Dataset using TF-IDF features. Produces evaluation
-metrics, confusion matrices, cross-validation scores and a CSV summary.
-
 Dataset: https://www.kaggle.com/datasets/mexwell/fake-reviews-dataset
 """
 
