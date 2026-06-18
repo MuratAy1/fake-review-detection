@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/28011471/README.md)
 # Fake Reviews & Opinion Spam Detection using Machine Learning
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
@@ -143,6 +142,14 @@ The interface returns one of three outputs:
 
 ---
 
+## Project Report
+
+A public-safe version of the graduation project report is available here:
+
+[Fake Review Detection Project Report](docs/fake-review-detection-report.pdf)
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -186,9 +193,11 @@ fake-review-detection/
 ├── fake_review_detector_4.py     # Main ML pipeline (EDA + 4-model training)
 ├── train_and_save_model.py       # Train and persist final SVM + TF-IDF artifacts
 ├── app.py                        # Streamlit web interface with abstention
-├──Start_app.bat                  # To start the app.py
+├── Start_app.bat                  # To start the app.py
 ├── test_external_dataset.py      # External test evaluation script
 ├── requirements.txt              # Python dependencies
+├── docs/                         # Public project report
+│   └── fake-review-detection-report.pdf
 ├── models/                       # Saved model artifacts (.pkl, .json)
 ├── results/                      # Generated plots and tables
 │   ├── 01_eda_analizi.png
